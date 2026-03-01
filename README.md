@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# Penguin Knockout
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A 2D browser-based physics game where penguins launch, collide, and try to knock each other off a shrinking ice platform. Last penguin standing wins.
 
-Currently, two official plugins are available:
+## How to Play
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Pick the number of penguins (you + bots)
+2. Each round, **click and drag** away from your penguin to aim (slingshot style) — drag distance = power
+3. Release to lock in your shot — all penguins launch simultaneously
+4. Knock opponents off the edge of the ice platform
+5. The arena **shrinks 20%** after every round
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** + **TypeScript** + **Vite**
+- **HTML5 Canvas** for all game rendering
+- **Tailwind CSS v4** for UI
+- Custom **2D physics engine** — impulse-based collisions, friction, drag, fixed 60Hz timestep
+- Deterministic **seeded PRNG** for reproducible simulations
+- **Vitest** for unit tests (19 tests)
 
-## Expanding the ESLint configuration
+No external physics or game engine libraries.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open `http://localhost:5173/` in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Running Tests
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm test
+```
+
+## Color Palette
+
+| Name        | Hex       |
+|-------------|-----------|
+| Soft Sky    | `#CDEBFF` |
+| Pastel Blue | `#89C2FF` |
+| Warm Yellow | `#FFD166` |
+| Coral Pink  | `#FF8FA3` |
+| Soft Navy   | `#2B2D42` |
+
+## Project Structure
+
+```
+src/
+├── game/           # Core game engine
+│   ├── engine.ts   # Game state, phases, round management
+│   ├── physics.ts  # 2D physics (collisions, friction, elimination)
+│   ├── bot.ts      # Bot AI
+│   ├── rng.ts      # Seeded PRNG
+│   ├── constants.ts
+│   ├── types.ts
+│   └── ArenaCanvas.tsx  # Canvas renderer
+├── pages/          # React pages (setup, game, game over)
+├── components/     # Shared UI components
+└── index.css       # Tailwind theme + animations
 ```
