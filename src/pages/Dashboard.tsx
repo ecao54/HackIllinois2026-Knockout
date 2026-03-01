@@ -33,14 +33,9 @@ export default function Dashboard() {
     setError(null);
 
     try {
-      const origin = window.location.origin;
-      const checkout = await api.createCheckoutSession(
-        account.player_id,
-        amount,
-        `${origin}/dashboard?deposited=true`,
-        `${origin}/dashboard`,
-      );
-      window.location.href = checkout.url;
+      const redirectUrl = `${window.location.origin}/dashboard`;
+      const session = await api.deposit(account.wallet_id, redirectUrl, amount);
+      window.location.href = session.url;
     } catch (err: unknown) {
       const e = err as { message?: string };
       setError(e.message || 'Failed to start checkout.');
@@ -198,7 +193,7 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-muted">Player ID</span>
-              <span className="text-slate-heading font-mono text-xs">{account.player_id}</span>
+              <span className="text-slate-heading font-mono text-xs">{account.wallet_id}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-muted">Member since</span>

@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Mock/offline game routes (no API needed)
 import PlaySetup from './pages/PlaySetup';
 import MockGame from './pages/MockGame';
 import MockGameOver from './pages/MockGameOver';
+import FundedCallback from './pages/FundedCallback';
 
 // Full API-backed routes
 import Landing from './pages/Landing';
@@ -20,10 +20,10 @@ import GameOver from './pages/GameOver';
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <Routes>
         {/* Playable game (mock engine, no API) */}
         <Route path="/" element={<PlaySetup />} />
+        <Route path="/play/funded" element={<FundedCallback />} />
         <Route path="/play/game" element={<MockGame />} />
         <Route path="/play/over" element={<MockGameOver />} />
 

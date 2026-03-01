@@ -1,17 +1,38 @@
-export interface Player {
-  player_id: string;
+export interface Wallet {
+  wallet_id: string;
   public_key: string;
   sol_balance?: number;
   usdc_balance?: number;
-  stripe_onramp_session_url?: string;
+  on_chain_usdc?: number;
+  simulated_usdc?: number;
 }
 
-export interface CheckoutSession {
+export interface DepositSession {
   url: string;
   amount_usd: number;
 }
 
+export interface TransferResult {
+  wallet_id: string;
+  before_balance: number;
+  after_balance: number;
+  amount_usdc: number;
+  note?: string;
+}
+
+export interface WithdrawResult {
+  status: string;
+  wallet_id?: string;
+  public_key?: string;
+  amount_usdc?: number;
+  remaining_balance?: number;
+  confirmation_id?: string;
+  settlement_mode?: string;
+}
+
+// Legacy types for grid-based game components (not used in demo flow)
 export interface GamePlayer {
+  player_id?: string;
   pubkey: string;
   x: number;
   y: number;
@@ -20,9 +41,7 @@ export interface GamePlayer {
 
 export interface Game {
   game_id: string;
-  pda_address?: string;
-  escrow_address?: string;
-  status: 'waiting' | 'active' | 'resolved';
+  status: string;
   grid_size: number;
   grid: number[];
   players: GamePlayer[];
@@ -31,31 +50,13 @@ export interface Game {
   prize_pool_usdc?: string;
   collapse_round?: number;
   winner?: string;
-  stripe_payout_initiated?: boolean;
-}
-
-export interface JoinResult {
-  game_id: string;
-  player_id: string;
-  start_x: number;
-  start_y: number;
-  status: string;
-}
-
-export interface MoveResult {
-  game_id: string;
-  player_id: string;
-  new_x: number;
-  new_y: number;
-  alive: boolean;
-  status: string;
-  winner?: string;
-  grid_snapshot: number[];
-  collapse_round?: number;
+  placements?: { player_id: string; place: number }[];
+  payouts?: { player_id: string; amount_usdc: string; status: string }[];
 }
 
 export interface ApiError {
   code: string;
   message: string;
   status: number;
+  remediation?: string;
 }

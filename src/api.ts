@@ -1,4 +1,4 @@
-import type { Player, CheckoutSession, Game, JoinResult, MoveResult } from './types';
+import type { Wallet, DepositSession, TransferResult, WithdrawResult } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -20,81 +20,79 @@ class ApiClient {
       ...(options.headers as Record<string, string> || {}),
     };
 
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      ...options,
-      headers,
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    let res: Response;
+    try {
+      res = await fetch(`${this.baseUrl}${path}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timeout);
+      if (err instanceof Error && err.name === 'AbortError') {
+        throw new Error('Could not reach server. Check VITE_API_URL and that the API is running.');
+      }
+      throw err;
+    }
+    clearTimeout(timeout);
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      const error = Object.assign(new Error(body.message || res.statusText), {
-        code: body.code || 'UNKNOWN',
-        status: res.status,
-      });
+      const nested = body.error ?? {};
+      const error = Object.assign(
+        new Error(nested.message || body.message || res.statusText),
+        {
+          code: nested.code || body.code || 'UNKNOWN',
+          status: body.statusCode || res.status,
+          remediation: nested.remediation,
+        },
+      );
       throw error;
     }
 
     return res.json();
   }
 
-  async createPlayer(): Promise<Player> {
-    return this.request<Player>('/v1/players', { method: 'POST' });
+  async createWallet(): Promise<Wallet> {
+    return this.request<Wallet>('/v1/wallets', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
   }
 
-  async getPlayer(playerId: string): Promise<Player> {
-    return this.request<Player>(`/v1/players/${playerId}`);
+  async getWallet(walletId: string): Promise<Wallet> {
+    return this.request<Wallet>(`/v1/wallets/${walletId}`);
   }
 
-  async createCheckoutSession(
-    playerId: string,
-    amountUsd: number,
-    successUrl: string,
-    cancelUrl: string,
-  ): Promise<CheckoutSession> {
-    return this.request<CheckoutSession>(
-      `/v1/players/${playerId}/checkout-session`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          amount_usd: amountUsd,
-          success_url: successUrl,
-          cancel_url: cancelUrl,
-        }),
-      },
-    );
-  }
-
-  async createGame(buyInUsdc: string, maxPlayers: number): Promise<Game> {
-    return this.request<Game>('/v1/games', {
+  async deposit(walletId: string, redirectUrl: string, amountUsd?: number): Promise<DepositSession> {
+    return this.request<DepositSession>(`/v1/wallets/${walletId}/deposit`, {
       method: 'POST',
       body: JSON.stringify({
-        buy_in_usdc: buyInUsdc,
-        max_players: maxPlayers,
+        redirect_url: redirectUrl,
+        ...(amountUsd != null && { amount_usd: amountUsd }),
       }),
     });
   }
 
-  async getGame(gameId: string): Promise<Game> {
-    return this.request<Game>(`/v1/games/${gameId}`);
-  }
-
-  async joinGame(gameId: string, playerId: string): Promise<JoinResult> {
-    return this.request<JoinResult>(`/v1/games/${gameId}/join`, {
+  async transfer(walletId: string, amountUsdc: number, note?: string): Promise<TransferResult> {
+    return this.request<TransferResult>(`/v1/wallets/${walletId}/transfer`, {
       method: 'POST',
       headers: { 'Idempotency-Key': uuidv4() },
-      body: JSON.stringify({ player_id: playerId }),
+      body: JSON.stringify({
+        amount_usdc: amountUsdc,
+        ...(note && { note }),
+      }),
     });
   }
 
-  async move(
-    gameId: string,
-    playerId: string,
-    direction: 'up' | 'down' | 'left' | 'right',
-  ): Promise<MoveResult> {
-    return this.request<MoveResult>(`/v1/games/${gameId}/move`, {
+  async withdraw(walletId: string, amountUsdc?: number): Promise<WithdrawResult> {
+    const body = amountUsdc != null ? { amount_usdc: amountUsdc } : {};
+    return this.request<WithdrawResult>(`/v1/wallets/${walletId}/withdraw`, {
       method: 'POST',
-      headers: { 'Idempotency-Key': uuidv4() },
-      body: JSON.stringify({ player_id: playerId, direction }),
+      body: JSON.stringify(body),
     });
   }
 }

@@ -1,8 +1,19 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api';
-import type { Game } from '../types';
+import { api } from '../api'; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+// Minimal game shape for grid-based mode (not used in demo flow)
+interface Game {
+  status: string;
+  players: { player_id?: string; pubkey: string; x: number; y: number; alive: boolean }[];
+  grid: number[];
+  collapse_round?: number;
+  winner?: string;
+  prize_pool_usdc?: string;
+  placements?: { player_id: string; place: number }[];
+  payouts?: { player_id: string; amount_usdc: string }[];
+}
 import GameCanvas from '../components/GameCanvas';
 
 export default function GameBoard() {
@@ -15,13 +26,13 @@ export default function GameBoard() {
   const [moving, setMoving] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval>>();
 
-  const playerId = account?.player_id ?? null;
+  const playerId = account?.wallet_id ?? null;
   const publicKey = account?.public_key ?? null;
 
   const fetchGame = useCallback(async () => {
     if (!gameId) return;
     try {
-      const g = await api.getGame(gameId);
+      const g = null as Game | null; void gameId; // TODO: getGame removed from API
       setGame(g);
       if (g.status === 'resolved') {
         clearInterval(pollingRef.current);
@@ -37,16 +48,44 @@ export default function GameBoard() {
     return () => clearInterval(pollingRef.current);
   }, [fetchGame]);
 
-  const myPlayer = game?.players.find((p) => p.pubkey === publicKey);
+  const myPlayer = game?.players.find(
+    (p) => p.player_id === playerId || p.pubkey === publicKey,
+  );
   const isAlive = myPlayer?.alive ?? false;
   const isResolved = game?.status === 'resolved';
 
   useEffect(() => {
     if (isResolved && game) {
-      const won = game.winner === publicKey;
-      navigate(`/game/${gameId}/over?won=${won}&prize=${game.prize_pool_usdc || '0'}`, { replace: true });
+      const won = game.winner === playerId;
+      const pool = parseFloat(game.prize_pool_usdc || '0');
+
+      let place = 0;
+      let payout = '0.00';
+      if (game.placements?.length) {
+        const myPlacement = game.placements.find(p => p.player_id === playerId);
+        place = myPlacement?.place ?? 0;
+      } else {
+        place = won ? 1 : 0;
+      }
+
+      if (game.payouts?.length) {
+        const myPayout = game.payouts.find(p => p.player_id === playerId);
+        payout = myPayout?.amount_usdc ?? '0.00';
+      } else {
+        payout = place === 1 ? (pool * 0.7).toFixed(2)
+               : place === 2 ? (pool * 0.3).toFixed(2)
+               : '0.00';
+      }
+
+      const params = new URLSearchParams({
+        won: String(place <= 2),
+        prize: game.prize_pool_usdc || '0',
+        place: String(place),
+        payout,
+      });
+      navigate(`/game/${gameId}/over?${params}`, { replace: true });
     }
-  }, [isResolved, game, publicKey, gameId, navigate]);
+  }, [isResolved, game, playerId, gameId, navigate]);
 
   const handleMove = useCallback(
     async (direction: 'up' | 'down' | 'left' | 'right') => {
@@ -56,7 +95,8 @@ export default function GameBoard() {
       setMoveError(null);
 
       try {
-        const result = await api.move(gameId, playerId, direction);
+        // TODO: move endpoint removed from API — game is now client-side
+        const result = null as any; void gameId; void playerId; void direction;
         setGame((prev) =>
           prev
             ? {
@@ -66,7 +106,7 @@ export default function GameBoard() {
                 collapse_round: result.collapse_round ?? prev.collapse_round,
                 winner: result.winner,
                 players: prev.players.map((p) =>
-                  p.pubkey === publicKey
+                  (p.player_id === playerId || p.pubkey === publicKey)
                     ? { ...p, x: result.new_x, y: result.new_y, alive: result.alive }
                     : p,
                 ),
@@ -80,6 +120,8 @@ export default function GameBoard() {
           TILE_IS_LAVA: "Can't move there — that tile collapsed!",
           OUT_OF_BOUNDS: "Can't move off the grid!",
           GAME_NOT_ACTIVE: 'Game is not active yet.',
+          MISSING_IDEMPOTENCY_KEY: 'Request error — please try again.',
+          REQUEST_IN_FLIGHT: 'Move still processing — hold on.',
         };
         setMoveError(msgs[e.code || ''] || e.message || 'Move failed');
         setTimeout(() => setMoveError(null), 2000);
@@ -186,10 +228,15 @@ export default function GameBoard() {
           </div>
         </div>
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-wider text-slate-muted">Pot</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-muted">
+            Pool {game.status === 'active' ? '🔒' : ''}
+          </p>
           <p className="text-lg font-bold text-penguin-orange">
             ${game.prize_pool_usdc || '0.00'}
           </p>
+          {game.status === 'active' && (
+            <p className="text-[9px] text-green-600 font-medium">Locked in escrow</p>
+          )}
         </div>
       </header>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api';
+import { api } from '../api'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import PenguinSvg from '../components/PenguinSvg';
 
 const WAGER_OPTIONS = [
@@ -35,8 +35,9 @@ export default function Lobby() {
     setError(null);
 
     try {
-      const game = await api.createGame(wager.toFixed(2), maxPlayers);
-      navigate(`/game/waiting?game_id=${game.game_id}`);
+      // TODO: Game creation removed from API — use wallet transfers + client-side game
+      await api.transfer(account.wallet_id, -wager, 'game entry');
+      navigate(`/`);
     } catch (err: unknown) {
       const e = err as { code?: string; message?: string };
       setError(e.message || 'Something went wrong. Please try again.');

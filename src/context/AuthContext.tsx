@@ -5,7 +5,7 @@ import { api } from '../api';
 export interface Account {
   username: string;
   displayName: string;
-  player_id: string;
+  wallet_id: string;
   public_key: string;
   createdAt: string;
 }
@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session on mount
   useEffect(() => {
     const activeUser = localStorage.getItem(ACTIVE_KEY);
     if (activeUser) {
@@ -65,17 +64,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshBalance = useCallback(async () => {
     if (!account) return;
     try {
-      const player = await api.getPlayer(account.player_id);
+      const wallet = await api.getWallet(account.wallet_id);
       setBalance({
-        sol_balance: player.sol_balance ?? 0,
-        usdc_balance: player.usdc_balance ?? 0,
+        sol_balance: wallet.sol_balance ?? 0,
+        usdc_balance: wallet.usdc_balance ?? 0,
       });
     } catch {
       // Silently fail — balance will show as stale
     }
   }, [account]);
 
-  // Fetch balance whenever account changes
   useEffect(() => {
     if (account) {
       refreshBalance();
@@ -91,13 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Username already taken. Try a different one or log in.');
     }
 
-    const player = await api.createPlayer();
+    const wallet = await api.createWallet();
 
     const acct: Account = {
       username: username.toLowerCase(),
       displayName: displayName || username,
-      player_id: player.player_id,
-      public_key: player.public_key,
+      wallet_id: wallet.wallet_id,
+      public_key: wallet.public_key,
       createdAt: new Date().toISOString(),
     };
 

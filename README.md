@@ -25,10 +25,15 @@ No external physics or game engine libraries.
 
 ```bash
 npm install
+npm run setup   # creates .env from .env.example if missing
 npm run dev
 ```
 
 Open `http://localhost:5173/` in your browser.
+
+### Enter Game Flow
+
+"Enter Game" uses Stripe checkout and the Splice API. See [ENTER_GAME_SETUP.md](ENTER_GAME_SETUP.md) for what you need to do and what the API team must provide.
 
 ## Running Tests
 

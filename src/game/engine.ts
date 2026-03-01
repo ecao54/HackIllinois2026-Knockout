@@ -10,13 +10,18 @@ import { mulberry32, seededShuffle } from './rng';
 import { updatePhysics, detectAndResolveCollisions, allSettled, createPenguin, penguinSpeed, checkEliminationOOB } from './physics';
 import { botAim, botThinkDelay } from './bot';
 
+export interface MatchPlacement {
+  penguinId: number;
+  place: number;
+}
+
 export type EngineEvent =
   | { type: 'launch'; penguinId: number; vx: number; vy: number }
   | { type: 'allLaunch' }
   | { type: 'eliminated'; penguinId: number }
   | { type: 'roundStart'; round: number }
   | { type: 'roundEnd' }
-  | { type: 'gameOver'; winnerId: number | null }
+  | { type: 'gameOver'; winnerId: number | null; placements: MatchPlacement[] }
   | { type: 'settled' };
 
 export class KnockoutEngine {
@@ -354,8 +359,18 @@ export class KnockoutEngine {
       this.state.winner = alive[0].id;
     }
 
+    const placements = this.computePlacements();
     this.state.phase = 'GAME_OVER';
-    this.emit({ type: 'gameOver', winnerId: this.state.winner });
+    this.emit({ type: 'gameOver', winnerId: this.state.winner, placements });
+  }
+
+  private computePlacements(): MatchPlacement[] {
+    const penguins = this.state.penguins;
+    const sorted = [...penguins].sort((a, b) => {
+      if (a.alive !== b.alive) return a.alive ? -1 : 1;
+      return (b.eliminationOrder ?? 0) - (a.eliminationOrder ?? 0);
+    });
+    return sorted.map((p, i) => ({ penguinId: p.id, place: i + 1 }));
   }
 
   // ---- Particle effects ----

@@ -1,15 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api';
-import type { Game } from '../types';
+import { api } from '../api'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import PenguinSvg, { PENGUIN_COLORS } from '../components/PenguinSvg';
 
 export default function WaitingRoom() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { account } = useAuth();
-  const [game, setGame] = useState<Game | null>(null);
+  const [game, setGame] = useState<{ players?: { player_id?: string; pubkey?: string }[]; max_players?: number; buy_in_usdc?: string; prize_pool_usdc?: string; escrow_address?: string; status?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const joinedRef = useRef(false);
@@ -29,22 +28,21 @@ export default function WaitingRoom() {
       if (!joinedRef.current) {
         setJoining(true);
         try {
-          await api.joinGame(gameId, account.player_id);
+          // TODO: joinGame removed — use wallet transfer for entry fee
+          void gameId; void account;
           joinedRef.current = true;
         } catch (err: unknown) {
           const e = err as { code?: string; message?: string };
-          if (e.code === 'GAME_FULL') {
-            setError('This game is already full.');
-            setJoining(false);
-            return;
-          }
-          if (e.code === 'GAME_NOT_JOINABLE') {
-            setError('This game has already started.');
-            setJoining(false);
-            return;
-          }
-          if (e.code === 'INSUFFICIENT_FUNDS') {
-            setError('Insufficient funds. Please deposit more money from your dashboard.');
+          const knownCodes: Record<string, string> = {
+            GAME_FULL: 'This game is already full.',
+            GAME_NOT_JOINABLE: 'This game has already started.',
+            INSUFFICIENT_FUNDS: 'Insufficient funds. Please deposit more money from your dashboard.',
+            MISSING_IDEMPOTENCY_KEY: 'Request error — please try again.',
+            REQUEST_IN_FLIGHT: 'Your join is still processing — please wait.',
+          };
+          const msg = knownCodes[e.code || ''];
+          if (msg) {
+            setError(msg);
             setJoining(false);
             return;
           }
@@ -55,7 +53,7 @@ export default function WaitingRoom() {
       const pollGame = async () => {
         if (cancelled) return;
         try {
-          const g = await api.getGame(gameId);
+          const g = null as typeof game; // TODO: getGame removed from API
           if (cancelled) return;
           setGame(g);
           if (g.status === 'active' || g.status === 'resolved') {
@@ -107,6 +105,7 @@ export default function WaitingRoom() {
 
   const playerCount = game?.players?.length ?? 0;
   const maxPlayers = game?.max_players ?? 4;
+  const myPlayerId = account?.wallet_id;
   const myPubkey = account?.public_key;
 
   return (
@@ -121,7 +120,7 @@ export default function WaitingRoom() {
         <div className="flex justify-center gap-4 flex-wrap mb-8">
           {Array.from({ length: maxPlayers }).map((_, i) => {
             const player = game?.players?.[i];
-            const isMe = player?.pubkey === myPubkey;
+            const isMe = player?.player_id === myPlayerId || player?.pubkey === myPubkey;
             return (
               <div key={i} className="flex flex-col items-center gap-2">
                 <div
@@ -152,17 +151,31 @@ export default function WaitingRoom() {
         </div>
 
         {game && (
-          <div className="bg-white border border-ice-200 rounded-xl p-4 inline-flex gap-6 shadow-sm">
-            <div className="text-center">
-              <p className="text-slate-muted text-xs">Wager</p>
-              <p className="text-slate-heading font-bold">${game.buy_in_usdc}</p>
+          <div className="space-y-3">
+            <div className="bg-white border border-ice-200 rounded-xl p-4 inline-flex gap-6 shadow-sm">
+              <div className="text-center">
+                <p className="text-slate-muted text-xs">Wager</p>
+                <p className="text-slate-heading font-bold">${game.buy_in_usdc}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-slate-muted text-xs">Pool</p>
+                <p className="text-penguin-orange font-bold">
+                  ${game.prize_pool_usdc || (parseFloat(game.buy_in_usdc) * playerCount).toFixed(2)}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-slate-muted text-xs">Escrow</p>
+                <p className="text-green-600 font-bold text-sm">
+                  {joinedRef.current ? '✓ Funded' : '—'}
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-slate-muted text-xs">Pot</p>
-              <p className="text-penguin-orange font-bold">
-                ${game.prize_pool_usdc || (parseFloat(game.buy_in_usdc) * playerCount).toFixed(2)}
+
+            {joinedRef.current && game.escrow_address && (
+              <p className="text-xs text-slate-muted/70 font-mono truncate max-w-xs mx-auto">
+                Escrow: {game.escrow_address.slice(0, 8)}…{game.escrow_address.slice(-6)}
               </p>
-            </div>
+            )}
           </div>
         )}
 

@@ -1,6 +1,26 @@
 @import "tailwindcss";
 
 @theme {
+  /* Arctic backgrounds */
+  --color-arctic-sky: #E8F4FC;
+  --color-arctic-ice: #B8D4E8;
+  --color-arctic-frost: #F0F8FF;
+
+  /* Neutrals */
+  --color-warm-grey: #6B7280;
+  --color-taupe: #8B7355;
+  --color-soft-brown: #A78B71;
+
+  /* Surfaces */
+  --color-card-bg: #FDFBF7;
+  --color-surface-elevated: #F5F0E8;
+
+  /* Text hierarchy */
+  --color-text-primary: #2D2A26;
+  --color-text-secondary: #5C5650;
+  --color-text-muted: #8B8682;
+
+  /* Legacy / compatibility */
   --color-ice-50: #e8f4ff;
   --color-ice-100: #CDEBFF;
   --color-ice-200: #89C2FF;
@@ -17,15 +37,22 @@
   --color-penguin-orange: #FFD166;
   --color-penguin-yellow: #FFD166;
   --color-coral: #FF8FA3;
-  --color-slate-heading: #2B2D42;
-  --color-slate-body: #3d3f56;
-  --color-slate-muted: #7b7d95;
+  --color-slate-heading: #2D2A26;
+  --color-slate-body: #5C5650;
+  --color-slate-muted: #8B8682;
+
+  --font-heading: 'Nunito', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-sky text-slate-body antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-arctic-sky text-slate-body antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
   }
 }
 
@@ -74,4 +101,42 @@
 
 .animate-wiggle {
   animation: wiggle 1s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }

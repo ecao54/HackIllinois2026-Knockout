@@ -1,7 +1,7 @@
 // Arena
 export const ARENA_RADIUS = 350;
 export const SPAWN_RADIUS = ARENA_RADIUS * 0.6; // 210
-export const ARENA_SHRINK = 0.80; // multiply radius by this each round
+export const ARENA_SHRINK = 0.85; // multiply radius by this each round (15% shrink)
 export const SHRINK_DURATION = 1.0; // seconds for the shrink animation
 
 // Penguin
@@ -14,7 +14,7 @@ export const DT = 1 / PHYSICS_HZ;
 export const FRICTION_COEFF = 0.25;
 export const GRAVITY = 980; // px/s^2, used only for normal force in friction calc
 export const DRAG_COEFF = 0.001;
-export const RESTITUTION = 0.75;
+export const RESTITUTION = 0.9;
 export const V_REST = 2; // px/s — below this, penguin is "at rest"
 export const REST_FRAMES = 15; // consecutive rest frames to count as settled
 export const MAX_SPEED = 900 * 1.5; // hard clamp to prevent energy explosions

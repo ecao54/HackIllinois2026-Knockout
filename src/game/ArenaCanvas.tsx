@@ -80,12 +80,12 @@ export default function ArenaCanvas({
     const [cx, cy] = toCanvas(0, 0);
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    // --- Water void (Soft Navy) ---
-    ctx.fillStyle = '#2B2D42';
+    // --- Water void (Arctic deep) ---
+    ctx.fillStyle = '#2D3A4F';
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    // Subtle water rings (Pastel Blue)
-    ctx.strokeStyle = 'rgba(137, 194, 255, 0.07)';
+    // Subtle water rings (Arctic ice)
+    ctx.strokeStyle = 'rgba(184, 212, 232, 0.08)';
     ctx.lineWidth = 1;
     for (let r = arenaRadius + 30; r < ARENA_RADIUS + CANVAS_PADDING; r += 18) {
       ctx.beginPath();
@@ -99,11 +99,11 @@ export default function ArenaCanvas({
     ctx.fillStyle = 'rgba(0,0,0,0.18)';
     ctx.fill();
 
-    // --- Ice surface (Soft Sky gradient) ---
+    // --- Ice surface (Arctic gradient) ---
     const iceGrad = ctx.createRadialGradient(cx - 40, cy - 40, 0, cx, cy, arenaRadius);
-    iceGrad.addColorStop(0, '#ffffff');
-    iceGrad.addColorStop(0.4, '#CDEBFF');
-    iceGrad.addColorStop(1, '#89C2FF');
+    iceGrad.addColorStop(0, '#F0F8FF');
+    iceGrad.addColorStop(0.35, '#E8F4FC');
+    iceGrad.addColorStop(1, '#B8D4E8');
     ctx.beginPath();
     ctx.arc(cx, cy, arenaRadius, 0, Math.PI * 2);
     ctx.fillStyle = iceGrad;
@@ -114,7 +114,7 @@ export default function ArenaCanvas({
     ctx.beginPath();
     ctx.arc(cx, cy, arenaRadius, 0, Math.PI * 2);
     ctx.clip();
-    ctx.strokeStyle = 'rgba(43, 45, 66, 0.06)';
+    ctx.strokeStyle = 'rgba(45, 58, 79, 0.06)';
     ctx.lineWidth = 1;
     for (let i = 0; i < 6; i++) {
       const a = (i / 6) * Math.PI * 2 + 0.3;
@@ -127,10 +127,10 @@ export default function ArenaCanvas({
     }
     ctx.restore();
 
-    // Edge (Pastel Blue)
+    // Edge (Arctic ice)
     ctx.beginPath();
     ctx.arc(cx, cy, arenaRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = '#89C2FF';
+    ctx.strokeStyle = '#B8D4E8';
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -144,7 +144,7 @@ export default function ArenaCanvas({
       ctx.beginPath();
       ctx.moveTo(hx, hy);
       ctx.lineTo(dx, dy);
-      ctx.strokeStyle = 'rgba(43, 45, 66, 0.3)';
+      ctx.strokeStyle = 'rgba(45, 58, 79, 0.3)';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]);
       ctx.stroke();
@@ -153,7 +153,7 @@ export default function ArenaCanvas({
       // Small circle at drag point
       ctx.beginPath();
       ctx.arc(dx, dy, 5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(43, 45, 66, 0.35)';
+      ctx.fillStyle = 'rgba(45, 58, 79, 0.35)';
       ctx.fill();
 
       // Launch direction arrow (opposite of drag)
@@ -240,13 +240,13 @@ export default function ArenaCanvas({
       // Body — Soft Navy outer
       ctx.beginPath();
       ctx.ellipse(0, 0, r, r * 1.05, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#2B2D42';
+      ctx.fillStyle = '#2D3A4F';
       ctx.fill();
 
       // Body highlight rim
       ctx.beginPath();
       ctx.ellipse(0, 0, r, r * 1.05, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(137, 194, 255, 0.12)';
+      ctx.strokeStyle = 'rgba(184, 212, 232, 0.15)';
       ctx.lineWidth = 1;
       ctx.stroke();
 
@@ -292,13 +292,13 @@ export default function ArenaCanvas({
         ctx.ellipse(side * eyeSpread, eyeY, r * 0.18, r * 0.2, 0, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
-        ctx.strokeStyle = '#2B2D42';
+        ctx.strokeStyle = '#2D3A4F';
         ctx.lineWidth = 0.5;
         ctx.stroke();
         // Iris
         ctx.beginPath();
         ctx.arc(side * eyeSpread + side * 0.5, eyeY + 1, r * 0.11, 0, Math.PI * 2);
-        ctx.fillStyle = '#2B2D42';
+        ctx.fillStyle = '#2D3A4F';
         ctx.fill();
         // Sparkle
         ctx.beginPath();
@@ -309,7 +309,7 @@ export default function ArenaCanvas({
 
       // Beak — contrasts with scarf if scarf is orange/yellow/red
       const isWarmScarf = ['#f97316', '#fbbf24', '#f87171'].includes(p.color);
-      const beakColor = isWarmScarf ? '#2B2D42' : '#FFD166';
+      const beakColor = isWarmScarf ? '#2D3A4F' : '#FFD166';
       ctx.beginPath();
       ctx.moveTo(0, -r * 0.05);
       ctx.lineTo(-r * 0.15, r * 0.12);
@@ -352,7 +352,7 @@ export default function ArenaCanvas({
       }
 
       // Name label
-      ctx.fillStyle = p.id === humanId ? '#FFD166' : '#89C2FF';
+      ctx.fillStyle = p.id === humanId ? '#FFD166' : '#B8D4E8';
       ctx.font = 'bold 9px Inter, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(p.isBot ? `Bot ${p.id}` : 'You', px, py + r + 16);
