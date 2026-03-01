@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
-import { SLIDER_HEIGHT } from './constants';
+const SLIDER_HEIGHT = 200;
 
 interface Props {
   visible: boolean;

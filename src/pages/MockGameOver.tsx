@@ -28,7 +28,7 @@ export default function MockGameOver() {
   const navigate = useNavigate();
   const won = searchParams.get('won') === 'true';
   const players = parseInt(searchParams.get('players') || '4', 10);
-  const place = parseInt(searchParams.get('place') || (won ? '1' : '0'), 10);
+  const _place = parseInt(searchParams.get('place') || (won ? '1' : '0'), 10); void _place;
   const wager = parseFloat(searchParams.get('wager') || '0.50');
   const net = parseFloat(searchParams.get('net') || '0');
   const settled = searchParams.get('settled') !== 'false';

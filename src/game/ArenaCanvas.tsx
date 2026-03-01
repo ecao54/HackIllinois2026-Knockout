@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react';
 import type { Penguin, ParticleEffect } from './types';
-import { ARENA_RADIUS, PENGUIN_RADIUS, MAX_DRAG_DISTANCE } from './constants';
+import { ARENA_RADIUS, PENGUIN_RADIUS } from './constants';
 
 export interface DragState {
   dragging: boolean;

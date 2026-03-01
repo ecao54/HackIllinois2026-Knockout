@@ -1,10 +1,9 @@
 import type { GameState, Penguin, LaunchInput, ParticleEffect } from './types';
 import {
-  ARENA_RADIUS, ARENA_SHRINK, SHRINK_DURATION, SPAWN_RADIUS, DT, V_REST, REST_FRAMES,
+  ARENA_RADIUS, ARENA_SHRINK, SHRINK_DURATION, SPAWN_RADIUS, DT, REST_FRAMES,
   V_MAX, V_MIN, DEAD_ZONE, POWER_EXPONENT,
   AIM_DURATION, ROUND_END_DURATION, MAX_SETTLE_TIME,
   AUTO_FIRE_IDLE_POWER, SCARF_COLORS, PENGUIN_RADIUS,
-
 } from './constants';
 import { mulberry32, seededShuffle } from './rng';
 import { updatePhysics, detectAndResolveCollisions, allSettled, createPenguin, penguinSpeed, checkEliminationOOB } from './physics';

@@ -1,19 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api'; // eslint-disable-line @typescript-eslint/no-unused-vars
-
-// Minimal game shape for grid-based mode (not used in demo flow)
-interface Game {
-  status: string;
-  players: { player_id?: string; pubkey: string; x: number; y: number; alive: boolean }[];
-  grid: number[];
-  collapse_round?: number;
-  winner?: string;
-  prize_pool_usdc?: string;
-  placements?: { player_id: string; place: number }[];
-  payouts?: { player_id: string; amount_usdc: string }[];
-}
+import type { Game } from '../types';
 import GameCanvas from '../components/GameCanvas';
 
 export default function GameBoard() {
@@ -21,7 +9,7 @@ export default function GameBoard() {
   const navigate = useNavigate();
   const { account } = useAuth();
   const [game, setGame] = useState<Game | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, _setError] = useState<string | null>(null); void _setError;
   const [moveError, setMoveError] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval>>();
@@ -32,9 +20,9 @@ export default function GameBoard() {
   const fetchGame = useCallback(async () => {
     if (!gameId) return;
     try {
-      const g = null as Game | null; void gameId; // TODO: getGame removed from API
+      const g = null as Game | null; void gameId;
       setGame(g);
-      if (g.status === 'resolved') {
+      if (g?.status === 'resolved') {
         clearInterval(pollingRef.current);
       }
     } catch {

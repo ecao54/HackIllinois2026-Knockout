@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api'; // eslint-disable-line @typescript-eslint/no-unused-vars
+// Legacy waiting room — not used in demo flow
 import PenguinSvg, { PENGUIN_COLORS } from '../components/PenguinSvg';
 
 export default function WaitingRoom() {
@@ -53,10 +53,10 @@ export default function WaitingRoom() {
       const pollGame = async () => {
         if (cancelled) return;
         try {
-          const g = null as typeof game; // TODO: getGame removed from API
+          const g = null as typeof game;
           if (cancelled) return;
           setGame(g);
-          if (g.status === 'active' || g.status === 'resolved') {
+          if (g?.status === 'active' || g?.status === 'resolved') {
             clearInterval(pollingRef.current);
             navigate(`/game/${gameId}`, { replace: true });
           }
@@ -160,7 +160,7 @@ export default function WaitingRoom() {
               <div className="text-center">
                 <p className="text-slate-muted text-xs">Pool</p>
                 <p className="text-penguin-orange font-bold">
-                  ${game.prize_pool_usdc || (parseFloat(game.buy_in_usdc) * playerCount).toFixed(2)}
+                  ${game.prize_pool_usdc || (parseFloat(game.buy_in_usdc ?? '0') * playerCount).toFixed(2)}
                 </p>
               </div>
               <div className="text-center">

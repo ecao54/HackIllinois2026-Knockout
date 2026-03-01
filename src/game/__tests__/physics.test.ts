@@ -4,7 +4,7 @@ import {
   createPenguin, penguinSpeed,
 } from '../physics';
 import {
-  ARENA_RADIUS, DT, PENGUIN_RADIUS, FRICTION_COEFF, GRAVITY,
+  ARENA_RADIUS, DT, PENGUIN_RADIUS,
   V_MAX, V_MIN, DEAD_ZONE, POWER_EXPONENT,
 } from '../constants';
 

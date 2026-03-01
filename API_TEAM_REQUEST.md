@@ -19,13 +19,13 @@ The API should remain a **general-purpose platform** — not built exclusively f
 
 The API manages player/burner wallets with standard balance operations. These should be general-purpose — any client (games, apps, etc.) can use them:
 
-| Capability | Endpoint | Status |
-|------------|----------|--------|
-| Create wallet | `POST /v1/players` | ✓ |
-| Fund (Stripe) | `POST /v1/players/:id/checkout-session` | ✓ |
-| Read balance | `GET /v1/players/:id` | ✓ |
-| Debit (join game) | `POST /v1/games/:id/join` | ✓ |
-| **Credit (on resolve)** | Wire into `POST /v1/games/:id/resolve` | **Missing** |
+| Capability              | Endpoint                                | Status      |
+| ----------------------- | --------------------------------------- | ----------- |
+| Create wallet           | `POST /v1/players`                      | ✓           |
+| Fund (Stripe)           | `POST /v1/players/:id/checkout-session` | ✓           |
+| Read balance            | `GET /v1/players/:id`                   | ✓           |
+| Debit (join game)       | `POST /v1/games/:id/join`               | ✓           |
+| **Credit (on resolve)** | Wire into `POST /v1/games/:id/resolve`  | **Missing** |
 
 The missing piece: when a game resolves, credit the winner's balance. Generic settlement, not Web3-specific.
 
@@ -38,6 +38,7 @@ The missing piece: when a game resolves, credit the winner's balance. Generic se
 **Problem:** The `join` endpoint sets `status: "active"` only when `players.length >= 2`. Games with client-side AI/bots, single-player modes, or practice sessions may have only one real player joining via API. Those games stay stuck in `waiting` forever.
 
 **What we need:** A generic way to start with fewer than `max_players` — useful for single-player, demo, or practice modes. One of these:
+
 - A `force_start` boolean on join: `POST /v1/games/:id/join` with `{ player_id, force_start: true }` — sets status to `active` even with 1 player
 - Or a separate `POST /v1/games/:id/start` endpoint
 - Or lower the minimum to 1 player when an env flag like `DEMO_MODE=true` is set
@@ -71,6 +72,7 @@ The missing piece: when a game resolves, credit the winner's balance. Generic se
 ```
 
 This should:
+
 - Set `status` to `"resolved"` and `winner` to the provided `player_id`
 - **Credit the winner's in-app balance** with their payout (Blocker 3)
 
@@ -128,16 +130,16 @@ After the game reaches `resolved` status, include these fields in `GET /v1/games
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `placements[].player_id` | string | Yes | Must match `player_id` from join |
-| `placements[].place` | number | Yes | 1 = winner, 2 = runner-up |
-| `payouts[].player_id` | string | Yes | Only top-2 need payouts |
-| `payouts[].amount_usdc` | string | Yes | Decimal string, 2 places |
-| `payouts[].status` | string | Yes | `"pending"` / `"settled"` / `"simulated"` |
-| `payouts[].settlement_mode` | string | Yes | `"simulated"` for hackathon |
-| `pool_usdc` | string | Yes | Total prize pool |
-| `settlement_status` | string | Yes | `"processing"` / `"completed"` |
+| Field                       | Type   | Required | Notes                                     |
+| --------------------------- | ------ | -------- | ----------------------------------------- |
+| `placements[].player_id`    | string | Yes      | Must match `player_id` from join          |
+| `placements[].place`        | number | Yes      | 1 = winner, 2 = runner-up                 |
+| `payouts[].player_id`       | string | Yes      | Only top-2 need payouts                   |
+| `payouts[].amount_usdc`     | string | Yes      | Decimal string, 2 places                  |
+| `payouts[].status`          | string | Yes      | `"pending"` / `"settled"` / `"simulated"` |
+| `payouts[].settlement_mode` | string | Yes      | `"simulated"` for hackathon               |
+| `pool_usdc`                 | string | Yes      | Total prize pool                          |
+| `settlement_status`         | string | Yes      | `"processing"` / `"completed"`            |
 
 ---
 
