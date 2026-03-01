@@ -12,7 +12,7 @@ export default function WaitingRoom() {
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const joinedRef = useRef(false);
-  const pollingRef = useRef<ReturnType<typeof setInterval>>();
+  const pollingRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const gameId = searchParams.get('game_id');
 

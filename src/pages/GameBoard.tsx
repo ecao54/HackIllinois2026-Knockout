@@ -12,7 +12,7 @@ export default function GameBoard() {
   const [error, _setError] = useState<string | null>(null); void _setError;
   const [moveError, setMoveError] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
-  const pollingRef = useRef<ReturnType<typeof setInterval>>();
+  const pollingRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const playerId = account?.wallet_id ?? null;
   const publicKey = account?.public_key ?? null;
